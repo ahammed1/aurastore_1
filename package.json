@@ -1,0 +1,14 @@
+{
+  "name": "aurastore-pern",
+  "version": "2.0.0",
+  "description": "AuraStore - Production Full-Stack PERN E-Commerce Architecture (PostgreSQL, Express, React, Node)",
+  "scripts": {
+    "server": "node backend/server.js",
+    "client": "npm start --prefix frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "test:api": "node backend/tests/api_verification.js"
+  },
+  "keywords": ["pern", "ecommerce", "react", "node", "express", "postgresql"],
+  "author": "Ahammed Yaseen N",
+  "license": "MIT"
+}

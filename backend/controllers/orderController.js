@@ -34,8 +34,9 @@ const createOrder = async (req, res) => {
     );
   }
 
-  const client = await getClient();
+  let client;
   try {
+    client = await getClient();
     await client.query('BEGIN');
 
     const productIds = [...requestedQuantities.keys()].sort();
@@ -152,7 +153,7 @@ const createOrder = async (req, res) => {
     console.error('[Checkout] Order creation failed:', error);
     return res.status(500).json({ message: 'Unable to place order. Please try again.' });
   } finally {
-    client.release();
+    if (client) client.release();
   }
 };
 

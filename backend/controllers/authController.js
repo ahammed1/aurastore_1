@@ -2,9 +2,15 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'secret', {
-    expiresIn: '30d',
-  });
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+
+  return jwt.sign(
+    { id, role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
+  );
 };
 
 // @desc    Register a new customer
@@ -52,7 +58,7 @@ const loginUser = async (req, res) => {
     return res.status(400).json({ message: 'Please provide email and password' });
   }
 
-  // Explicitly include select('+password') since password has select: false
+  // Explicitly include the password hash for password comparison.
   const user = await User.findOne({ email }).select('+password');
 
   if (user && (await user.matchPassword(password))) {

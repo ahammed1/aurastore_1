@@ -2,60 +2,64 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 const protect = async (req, res, next) => {
-  let token;
-  const authHeader = req.headers.authorization;
+  try {
+    const authHeader = req.headers.authorization;
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.split(' ')[1];
-
-    // Support frontend development demo tokens
-    if (token === 'mock_jwt_customer_token_2026') {
-      const user = await User.findById('usr_cust_demo');
-      req.user = user || {
-        _id: 'usr_cust_demo',
-        id: 'usr_cust_demo',
-        name: 'Jane Customer',
-        email: 'customer@aurastore.com',
-        role: 'customer',
-      };
-      return next();
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        message: 'Not authorized, no bearer token supplied',
+      });
     }
 
-    if (token === 'mock_jwt_admin_token_2026') {
-      const user = await User.findById('usr_admin_demo');
-      req.user = user || {
-        _id: 'usr_admin_demo',
-        id: 'usr_admin_demo',
-        name: 'Alex Admin',
-        email: 'admin@aurastore.com',
-        role: 'admin',
-      };
-      return next();
+    const token = authHeader.slice(7).trim();
+
+    if (!token) {
+      return res.status(401).json({
+        message: 'Not authorized, no bearer token supplied',
+      });
     }
 
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-      req.user = await User.findById(decoded.id).select('-password');
-      if (!req.user) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
-      }
-      return next();
-    } catch (error) {
-      return res.status(401).json({ message: 'Not authorized, token invalid or expired' });
+    if (!process.env.JWT_SECRET) {
+      console.error('[Auth] JWT_SECRET is not configured');
+      return res.status(500).json({
+        message: 'Authentication service is not configured',
+      });
     }
-  }
 
-  if (!token) {
-    return res.status(401).json({ message: 'Not authorized, no bearer token supplied' });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({
+        message: 'Not authorized, user not found',
+      });
+    }
+
+    // Use the current database record so role changes take effect immediately.
+    req.user = user;
+    return next();
+  } catch (error) {
+    if (error.name === 'TokenExpiredError' || error.name === 'JsonWebTokenError') {
+      return res.status(401).json({
+        message: 'Not authorized, token invalid or expired',
+      });
+    }
+
+    console.error('[Auth] Authentication error:', error.message);
+    return res.status(500).json({
+      message: 'Authentication could not be completed',
+    });
   }
 };
 
 const admin = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Forbidden: administrative privilege required' });
+    return next();
   }
+
+  return res.status(403).json({
+    message: 'Forbidden: administrative privilege required',
+  });
 };
 
 module.exports = { protect, admin };

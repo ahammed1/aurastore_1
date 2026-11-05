@@ -34,20 +34,42 @@ This guide walks you through setting up real password authentication with role-s
 └───────────────────────────────┘               └───────────────────────────────┘
 ```
 
+## Backend Environment Setup
+
+1. Open the `backend` folder.
+2. Copy `.env.example` to a new file named `.env`.
+3. Set your own PostgreSQL password in `PGPASSWORD`.
+4. Generate a private JWT secret by running:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+5. Paste the generated value into `JWT_SECRET` in `backend/.env`. Never commit the real `.env` file.
+6. Create the PostgreSQL database named `aurastore` if it does not already exist, then start the backend:
+
+```powershell
+cd backend
+npm install
+npm run dev
+```
+
+The backend applies the SQL schema at startup and does not begin listening until PostgreSQL is ready. Real customer registration and administrator login use database-backed accounts; hardcoded demo tokens are not accepted.
+
 ## 1. Setting Up the Administrator Account
 
 To establish a verified administrator in PostgreSQL with your password, run the included CLI provisioning utility:
 
 ```powershell
 cd "C:\New folder (2)\aurastore_project\backend"
-node config/createAdmin.js admin@aurastore.com Postgre1234 "Store Administrator"
+npm run create-admin -- admin@aurastore.com "<your-12-character-or-longer-password>" "Store Administrator"
 ```
 
 ### What This Does:
 
-1. Connects to your PostgreSQL `aurastore` database using your database password (`Postgre1234`).
+1. Connects to your PostgreSQL `aurastore` database using the credentials configured in `backend/.env`.
 2. Checks if an account with `admin@aurastore.com` exists.
-3. Generates a cryptographic salt and hashes `Postgre1234` with 10 bcrypt salt rounds.
+3. Generates a cryptographic salt and hashes the supplied password with bcrypt.
 4. Inserts the record into the `users` table with `role = 'admin'`.
 
 *(You can also use this command to create multiple administrator accounts with custom emails and passwords).*
@@ -69,7 +91,7 @@ The frontend navigation bar includes dedicated authentication access points:
 ### B. Administrator Portal Access
 
 1. In the header, click the dark **Admin Portal** button.
-2. Enter your admin email (`admin@aurastore.com`) and password (`Postgre1234`).
+2. Enter the administrator email and password you supplied to the provisioning command.
 3. Click **Sign In to Admin Console**.
 4. **Role Enforcement**:
    * The backend validates the password and verifies `user.role === 'admin'`.

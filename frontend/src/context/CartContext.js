@@ -30,9 +30,9 @@ export const CartProvider = ({ children }) => {
   }, [user]);
 
   // Add or update item with live stock boundary checks
-  const addToCart = async (product, qty) => {
-    const requestedQty = Number(qty);
-    const existing = cartItems.find((x) => x.product === product._id || x.product === product.product);
+  const addToCart = async (product, qty = 1) => {
+    const requestedQty = Number(qty) > 0 ? Number(qty) : 1;
+    const existing = cartItems.find((x) => x.product === (product._id || product.id || product.product));
 
     const liveMaxStock = product.countInStock !== undefined ? product.countInStock : 999;
     const finalQty = Math.min(requestedQty, liveMaxStock);
@@ -40,9 +40,10 @@ export const CartProvider = ({ children }) => {
     if (finalQty <= 0) return;
 
     let updated;
+    const prodId = product._id || product.id || product.product;
     if (existing) {
       updated = cartItems.map((x) =>
-        x.product === (product._id || product.product)
+        (x.product === prodId)
           ? { ...x, qty: Math.min(x.qty + finalQty, liveMaxStock) }
           : x
       );
@@ -50,7 +51,7 @@ export const CartProvider = ({ children }) => {
       updated = [
         ...cartItems,
         {
-          product: product._id || product.product,
+          product: prodId,
           name: product.name,
           image: product.image,
           price: product.price,
@@ -65,7 +66,7 @@ export const CartProvider = ({ children }) => {
     if (user && user.token) {
       try {
         await API.post('/cart', {
-          productId: product._id || product.product,
+          productId: prodId,
           qty: finalQty,
         });
       } catch (err) {

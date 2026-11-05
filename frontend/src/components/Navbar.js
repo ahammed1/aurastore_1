@@ -27,14 +27,14 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
   return (
     <>
       <header style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: 'rgba(255, 255, 255, 0.92)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid #e2e8f0',
         position: 'sticky',
         top: 0,
         zIndex: 50,
         padding: '12px 24px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
       }}>
         <div style={{
           maxWidth: '1240px',
@@ -44,7 +44,7 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
           justifyContent: 'space-between',
           gap: '20px',
         }}>
-          {/* Brand */}
+          {/* Brand Logo */}
           <div
             onClick={() => setActiveScreen('home')}
             style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}
@@ -60,27 +60,33 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
               color: '#ffffff',
               fontWeight: '800',
               fontSize: '20px',
+              boxShadow: '0 4px 10px rgba(2, 132, 199, 0.35)',
             }}>A</div>
             <div>
-              <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>
+              <span style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.5px' }}>
                 Aura<span style={{ color: '#0284c7' }}>Store</span>
               </span>
-              <div style={{ fontSize: '9px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
-                PERN Edition
-              </div>
             </div>
           </div>
 
-          {/* Search */}
-          <div style={{ flex: '1', maxWidth: '440px', position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+          {/* Global Search Bar */}
+          <div style={{ flex: '1', maxWidth: '460px', position: 'relative' }}>
+            <span style={{
+              position: 'absolute',
+              left: '14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: '#94a3b8',
+              fontSize: '14px',
+              pointerEvents: 'none',
+            }}>
               🔍
             </span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search headphones, wearables, brand..."
+              placeholder="Search audio, wearables, gaming..."
               style={{
                 width: '100%',
                 padding: '9px 16px 9px 38px',
@@ -90,11 +96,22 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
                 fontSize: '13px',
                 backgroundColor: '#f8fafc',
                 boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#0284c7';
+                e.target.style.backgroundColor = '#ffffff';
+                e.target.style.boxShadow = '0 0 0 3px rgba(2, 132, 199, 0.15)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#cbd5e1';
+                e.target.style.backgroundColor = '#f8fafc';
+                e.target.style.boxShadow = 'none';
               }}
             />
           </div>
 
-          {/* Nav Controls */}
+          {/* Navigation Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button
               onClick={() => setActiveScreen('home')}
@@ -147,12 +164,14 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
+                  boxShadow: '0 2px 6px rgba(15, 23, 42, 0.2)',
                 }}
               >
                 <span>⚡</span> Admin SKU Portal
               </button>
             )}
 
+            {/* Auth Buttons or User Profile */}
             {!user ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
@@ -188,7 +207,12 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', fontSize: '12px' }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-end',
+                  fontSize: '12px',
+                }}>
                   <span style={{ fontWeight: '700', color: '#0f172a' }}>{user.name}</span>
                   <span style={{
                     fontSize: '10px',
@@ -217,40 +241,47 @@ const Navbar = ({ activeScreen, setActiveScreen, searchQuery, setSearchQuery }) 
               </div>
             )}
 
-            <button
-              onClick={() => setIsDrawerOpen(true)}
-              style={{
-                background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-                color: '#ffffff',
-                border: 'none',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                fontWeight: '700',
-                fontSize: '13px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                cursor: 'pointer',
-              }}
-            >
-              <span>🛒</span> Cart
-              {totalCartCount > 0 && (
-                <span style={{
-                  backgroundColor: '#ffffff',
-                  color: '#0284c7',
-                  borderRadius: '50%',
-                  padding: '2px 7px',
-                  fontSize: '11px',
-                  fontWeight: '800',
-                }}>
-                  {totalCartCount}
-                </span>
-              )}
-            </button>
+            {/* Cart Trigger Button - Rendered only for customers/guests, hidden in Admin Portal & for Admins */}
+            {user?.role !== 'admin' && activeScreen !== 'admin' && (
+              <button
+                onClick={() => setIsDrawerOpen(true)}
+                style={{
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  fontWeight: '700',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 10px rgba(2, 132, 199, 0.25)',
+                }}
+              >
+                <span>🛒</span>
+                Cart
+                {totalCartCount > 0 && (
+                  <span style={{
+                    backgroundColor: '#ffffff',
+                    color: '#0284c7',
+                    borderRadius: '50%',
+                    padding: '2px 7px',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                  }}>
+                    {totalCartCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
         </div>
       </header>
 
+      {/* Auth Modal */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}

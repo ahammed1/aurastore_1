@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userInfo');
   };
 
-  // Development Role Switching (Guest, Customer, Administrator)
+  // Development Role Switching (Customer, Administrator)
   const setDevRole = (role) => {
     if (role === 'guest') {
       setUser(null);

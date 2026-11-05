@@ -40,14 +40,14 @@ To establish a verified administrator in PostgreSQL with your password, run the 
 
 ```powershell
 cd "C:\New folder (2)\aurastore_project\backend"
-node config/createAdmin.js admin@aurastore.com Postgre1234 "Store Administrator"
+npm run create-admin -- admin@aurastore.com "<your-12-character-or-longer-password>" "Store Administrator"
 ```
 
 ### What This Does:
 
-1. Connects to your PostgreSQL `aurastore` database using your database password (`Postgre1234`).
+1. Connects to your PostgreSQL `aurastore` database using the credentials configured in `backend/.env`.
 2. Checks if an account with `admin@aurastore.com` exists.
-3. Generates a cryptographic salt and hashes `Postgre1234` with 10 bcrypt salt rounds.
+3. Generates a cryptographic salt and hashes the supplied password with bcrypt.
 4. Inserts the record into the `users` table with `role = 'admin'`.
 
 *(You can also use this command to create multiple administrator accounts with custom emails and passwords).*
@@ -69,7 +69,7 @@ The frontend navigation bar includes dedicated authentication access points:
 ### B. Administrator Portal Access
 
 1. In the header, click the dark **Admin Portal** button.
-2. Enter your admin email (`admin@aurastore.com`) and password (`Postgre1234`).
+2. Enter the administrator email and password you supplied to the provisioning command.
 3. Click **Sign In to Admin Console**.
 4. **Role Enforcement**:
    * The backend validates the password and verifies `user.role === 'admin'`.

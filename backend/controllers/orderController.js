@@ -111,7 +111,7 @@ const createOrder = async (req, res) => {
         orderId,
         userId,
         JSON.stringify(shippingAddress),
-        paymentMethod || 'Cash on Delivery',
+        paymentMethod || 'Credit Card',
         itemsPrice,
         taxPrice,
         shippingPrice,

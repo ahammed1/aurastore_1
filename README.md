@@ -34,6 +34,28 @@ This guide walks you through setting up real password authentication with role-s
 └───────────────────────────────┘               └───────────────────────────────┘
 ```
 
+## Backend Environment Setup
+
+1. Open the `backend` folder.
+2. Copy `.env.example` to a new file named `.env`.
+3. Set your own PostgreSQL password in `PGPASSWORD`.
+4. Generate a private JWT secret by running:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+5. Paste the generated value into `JWT_SECRET` in `backend/.env`. Never commit the real `.env` file.
+6. Create the PostgreSQL database named `aurastore` if it does not already exist, then start the backend:
+
+```powershell
+cd backend
+npm install
+npm run dev
+```
+
+The backend applies the SQL schema at startup and does not begin listening until PostgreSQL is ready. Real customer registration and administrator login use database-backed accounts; hardcoded demo tokens are not accepted.
+
 ## 1. Setting Up the Administrator Account
 
 To establish a verified administrator in PostgreSQL with your password, run the included CLI provisioning utility:
